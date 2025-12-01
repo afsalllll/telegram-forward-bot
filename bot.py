@@ -1,4 +1,4 @@
-from pyrogram import Client, filters
+from pyrogram import Client, filters, idle
 import asyncio
 from config import API_ID, API_HASH, BOT_TOKEN, SOURCE_CHAT, TARGET_CHATS, SCHEDULE_TEXT, SCHEDULE_INTERVAL
 
@@ -18,7 +18,7 @@ async def forward(client, message):
         except Exception as e:
             print(f"❌ Error sending to {chat}: {e}")
 
-# Scheduled message
+# Scheduled message loop
 async def scheduled_task():
     while True:
         for chat in TARGET_CHATS:
@@ -30,15 +30,14 @@ async def scheduled_task():
 
 @app.on_message(filters.command("start"))
 async def start_msg(client, message):
-    await message.reply("✅ Bot is running successfully!")
+    await message.reply("✅ Bot is running successfully with auto-forward + scheduler!")
 
 async def main():
-    asyncio.create_task(scheduled_task())
     await app.start()
     print("Bot started!")
-    await idle()
-
-from pyrogram import idle
+    asyncio.create_task(scheduled_task())  # Start scheduler
+    await idle()  # Keep bot running
+    await app.stop()
 
 if __name__ == "__main__":
-    app.run()
+    asyncio.run(main())
